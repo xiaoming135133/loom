@@ -1,6 +1,6 @@
 # server　云端结构服务
 
-Python + FastAPI。W2 起在这里落地，负责把一张图变成树上的一个节点。
+Python + FastAPI。当前已落地一个离线可演示的结构服务，负责把素材变成树上的一个节点。
 
 ## 管道（对应 §2.3.3）
 
@@ -23,11 +23,26 @@ Python + FastAPI。W2 起在这里落地，负责把一张图变成树上的一�
 ## 本地跑起来
 
 ```bash
-cd server
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1        # PowerShell；Git Bash 用 source .venv/Scripts/activate
-pip install -r requirements.txt
-uvicorn main:app --reload
+pip install -r server\requirements.txt
+uvicorn server.main:app --reload --host 127.0.0.1 --port 8765
 ```
 
 密钥一律读环境变量：`OCR_API_KEY` / `LLM_API_KEY` 之类，**不要写进代码，也不要提交 `.env`**。
+
+## 当前实现
+
+- SQLite 四张表：`assets`、`nodes`、`edges`、`revisions`。
+- 上传原图只写本机 `server/data/uploads/`，不上传外部服务。
+- 内置高数样张提供固定分区结果；任意上传图片进入 `manual_required`，等待人工补文字。
+- 候选路：字符二元组余弦、字面相似度、LaTeX 符号交集。
+- 阈值：`≥0.80` 自动执行，`0.55–0.80` 标黄待确认，`<0.55` 进入未归类箱。
+- 单条修正、批量确认、节点改挂和编辑均写入 `revisions`。
+
+运行测试：
+
+```powershell
+pip install -r server\requirements-dev.txt
+python -m pytest -c server\pytest.ini
+```

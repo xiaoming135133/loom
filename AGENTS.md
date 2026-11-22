@@ -24,25 +24,25 @@ LOOM（脉络）：把课堂板书持续织成一张可维护、可修正的知�
 | `docs/07` | 仓库本身的待办与匿名自查 | — |
 | `app/` | Android 客户端（Kotlin + Compose） | W2 起才有代码 |
 | `server/` | 云端结构服务（FastAPI） | W2 起才有代码 |
+| `web/` | 网页整理台（原生 HTML/CSS/ES Modules） | 由 FastAPI 同域托管，无前端构建步骤 |
 | `datasets/` | 可提交的标注 CSV 与清单 | 照片不进仓库 |
 | `scripts/` | 一次性脚本 | 默认要能"预览"，别一运行就产生副作用 |
 
 ## 命令（当前现状）
 
-目前仓库里**没有可运行的代码**，唯一能跑的是：
+当前网页 MVP 可运行：
 
 ```powershell
-pwsh -File scripts/create-issues.ps1          # 预览要建哪些 Issue
-pwsh -File scripts/create-issues.ps1 -Apply   # 真的创建
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r server\requirements-dev.txt
+pwsh -File scripts/run-web.ps1
+python -m pytest -c server/pytest.ini
 ```
 
-以下命令**还不存在**，是 W2 起要达到的形态，不要为了"让命令能跑"而凭空搭一套目录结构：
+以下命令仍未落地：
 
 ```bash
-# server（W2 起）
-cd server && python -m venv .venv && .\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt && uvicorn main:app --reload
-
 # app（W2 起）
 ./gradlew assembleDebug
 ```

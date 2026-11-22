@@ -57,6 +57,11 @@ raw/
 exports/
 tmp/
 *.log
+server/data/
+
+# ---- Codex 本地工作区 ----
+work/
+outputs/
 
 # ---- Office 临时文件 ----
 ~$*

@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3efe5">
+  <meta name="description" content="LOOM 脉络：把课堂板书持续织成一张可维护、可修正的知识网。">
+  <title>LOOM · 脉络</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%231f2926'/%3E%3Cpath d='M8 10l16 3M8 16l16-3M8 22l16 3' stroke='%23f3efe5' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+
+  <header class="topbar">
+    <button class="brand" id="brandButton" type="button" aria-label="返回整理台">
+      <span class="brand-mark" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </span>
+      <span class="brand-copy">
+        <strong>LOOM</strong>
+        <small>脉络</small>
+      </span>
+    </button>
+
+    <nav class="main-tabs" aria-label="主要视图">
+      <button class="tab active" type="button" data-view="workspace">整理台</button>
+      <button class="tab" type="button" data-view="graph">关系图</button>
+      <button class="tab" type="button" data-view="revisions">修订</button>
+    </nav>
+
+    <div class="top-actions">
+      <form class="search-box" id="searchForm">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="6.5"></circle>
+          <path d="m16 16 4.2 4.2"></path>
+        </svg>
+        <input id="searchInput" type="search" maxlength="80" autocomplete="off" placeholder="搜语义、公式或章节">
+        <kbd>↵</kbd>
+      </form>
+      <span class="mode-pill" id="modePill">
+        <span class="mode-dot"></span>
+        离线演示
+      </span>
+      <button class="icon-button" id="pendingButton" type="button" title="打开未归类箱" aria-label="未归类箱">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 7.5h16l-1.4 11H5.4L4 7.5Z"></path>
+          <path d="M8 7.5V5.8A1.8 1.8 0 0 1 9.8 4h4.4A1.8 1.8 0 0 1 16 5.8v1.7"></path>
+          <path d="M9.2 11.5h5.6"></path>
+        </svg>
+        <span class="badge" id="pendingBadge" hidden>0</span>
+      </button>
+      <label class="primary-button compact" for="fileInput">
+        拍一张
+        <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+      </label>
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <aside class="tree-rail">
+      <div class="rail-heading">
+        <div>
+          <span class="eyebrow">KNOWLEDGE TREE</span>
+          <h2>知识树</h2>
+        </div>
+        <span class="count-chip" id="nodeCount">0 节点</span>
+      </div>
+      <div class="tree-scroll">
+        <div id="tree" class="tree" aria-label="知识树"></div>
+        <div id="treeSkeleton" class="tree-skeleton" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i>
+        </div>
+      </div>
+      <div class="rail-note">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3 5 6v5c0 5 3.2 8.2 7 10 3.8-1.8 7-5 7-10V6l-7-3Z"></path>
+          <path d="m9 12 2 2 4-4"></path>
+        </svg>
+        <div>
+          <strong>原图只在这台设备上</strong>
+          <span>每次自动结果都能回到原始那一页</span>
+        </div>
+      </div>
+    </aside>
+
+    <main class="workbench">
+      <section id="welcomeView" class="view-section welcome-view">
+        <div class="hero-copy">
+          <span class="eyebrow">NOTES THAT GROW</span>
+          <h1>不是存下来，<br><em>是长出来。</em></h1>
+          <p>把新板书放进来。LOOM 会先回答一个问题：<strong>它该长在哪？</strong>有把握就说明理由，没把握就先等待。</p>
+          <div class="hero-actions">
+            <label class="primary-button" for="heroFileInput">
+              上传一张板书
+              <input id="heroFileInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+            </label>
+            <button class="text-button" type="button" id="openFirstSample">先看一个完整示例 <span>→</span></button>
+          </div>
+        </div>
+
+        <div class="sample-section">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">ONE-CLICK DEMO</span>
+              <h2>从一张真实结构的样张开始</h2>
+            </div>
+            <p>匿名合成 · 不调用外部模型 · 可当场修改</p>
+          </div>
+          <div class="sample-grid" id="sampleGrid"></div>
+        </div>
+
+        <div class="principle-strip">
+          <div>
+            <span>01</span>
+            <strong>认完以后，它去哪？</strong>
+            <p>不是再建一个文件夹，而是接进已有结构。</p>
+          </div>
+          <div>
+            <span>02</span>
+            <strong>不确定，可以不猜。</strong>
+            <p>低置信内容进入未归类箱，攒够后一次问完。</p>
+          </div>
+          <div>
+            <span>03</span>
+            <strong>改一次，就是一次反馈。</strong>
+            <p>你的拖动和确认，会留下可追溯的修订轨迹。</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="reviewView" class="view-section review-view" hidden>
+        <div class="review-head">
+          <div>
+            <div class="breadcrumb" id="assetBreadcrumb">课堂板书 / 待整理</div>
+            <h1 id="reviewHeading">新的一张板书</h1>
+          </div>
+          <div class="review-actions">
+            <span class="status-pill" id="assetStatusPill">处理中</span>
+            <button class="quiet-button" type="button" id="saveContentButton">保存文字</button>
+            <button class="primary-button" type="button" id="alignButton">开始结构对齐</button>
+          </div>
+        </div>
+
+        <div class="review-grid">
+          <article class="paper-card">
+            <div class="card-topline">
+              <span>原始影像</span>
+              <span id="originalFilename">课堂照片</span>
+            </div>
+            <div class="original-stage">
+              <img id="originalImage" alt="当前板书原图">
+              <div class="scan-line" aria-hidden="true"></div>
+              <div class="image-stamp">原图永远可对照</div>
+            </div>
+            <div class="region-strip" id="regionStrip"></div>
+          </article>
+
+          <article class="content-card">
+            <div class="card-topline">
+              <span>识别与修正</span>
+              <span class="editable-hint">所有字段可改</span>
+            </div>
+            <div id="manualNotice" class="manual-notice" hidden>
+              <strong>离线模式下还认不出这张原图</strong>
+              <p>请手动补一句摘要或 LaTeX，再运行结构对齐。系统不会伪造识别结果。</p>
+            </div>
+            <label class="field">
+              <span>页面标题</span>
+              <input id="assetTitleInput" type="text" maxlength="80" placeholder="例如：3.2 洛必达法则课堂推导">
+            </label>
+            <label class="field">
+              <span>一句话摘要 <small>用于候选召回</small></span>
+              <textarea id="summaryInput" rows="3" maxlength="1200" placeholder="这张板书在讲什么？"></textarea>
+            </label>
+            <label class="field">
+              <span>文字内容</span>
+              <textarea id="textInput" rows="5" maxlength="12000" placeholder="识别文字，或者在这里手动输入"></textarea>
+            </label>
+            <label class="field formula-field">
+              <span>LaTeX / 公式符号</span>
+              <textarea id="latexInput" rows="4" maxlength="6000" spellcheck="false" placeholder="\lim_{x\to 0}\frac{\sin x}{x}=1"></textarea>
+            </label>
+          </article>
+        </div>
+      </section>
+
+      <section id="graphView" class="view-section graph-view" hidden>
+        <div class="view-heading">
+          <div>
+            <span class="eyebrow">KNOWLEDGE GRAPH</span>
+            <h1>知识不是一排文件，<br>而是一张可回看的网。</h1>
+          </div>
+          <div class="graph-legend">
+            <span><i class="legend-tree"></i>树结构</span>
+            <span><i class="legend-cross"></i>跨章节关系</span>
+          </div>
+        </div>
+        <div class="graph-card">
+          <div id="graphCanvas" class="graph-canvas"></div>
+        </div>
+      </section>
+
+      <section id="searchView" class="view-section search-view" hidden>
+        <div class="view-heading compact-heading">
+          <div>
+            <span class="eyebrow">THREE-LAYER RECALL</span>
+            <h1>三层检索</h1>
+            <p>语义、符号、结构各自召回，再告诉你为什么命中。</p>
+          </div>
+        </div>
+        <div class="search-hero">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5"></circle>
+            <path d="m16 16 4.2 4.2"></path>
+          </svg>
+          <input id="searchPageInput" type="search" maxlength="80" placeholder="试试「洛必达」「ε-δ」或「无穷级数」">
+          <button id="searchPageButton" type="button">检索</button>
+        </div>
+        <div id="searchResults" class="search-results">
+          <div class="empty-state">
+            <span class="empty-mark">⌕</span>
+            <strong>从一个模糊记忆开始</strong>
+            <p>只记得符号也没关系，符号层会单独召回。</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="revisionsView" class="view-section revisions-view" hidden>
+        <div class="view-heading">
+          <div>
+            <span class="eyebrow">CORRECTION AS FEEDBACK</span>
+            <h1>修订记录</h1>
+            <p>每次确认、改挂和编辑都在这里留下依据。</p>
+          </div>
+          <div class="revision-summary" id="revisionSummary"></div>
+        </div>
+        <div class="revision-list" id="revisionList"></div>
+      </section>
+    </main>
+
+    <aside class="context-rail" id="contextRail">
+      <section id="contextEmpty" class="context-empty">
+        <span class="eyebrow">CURRENT WORK</span>
+        <h2>结构在右边落地</h2>
+        <p>选择一张板书样张，查看系统如何给出关系、目标、置信度和理由。</p>
+        <div class="metric-stack">
+          <div><strong id="metricAssets">0</strong><span>已处理素材</span></div>
+          <div><strong id="metricRevisions">0</strong><span>修订记录</span></div>
+          <div><strong id="metricCorrection">0%</strong><span>实际修正率</span></div>
+        </div>
+        <div class="mode-card">
+          <span class="mode-icon">◌</span>
+          <div>
+            <strong>离线演示模式</strong>
+            <p>规则结果不等同于真实 OCR 准确率。任意上传图片会进入人工确认。</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="suggestionPanel" class="suggestion-panel" hidden>
+        <div class="panel-kicker">
+          <span>STRUCTURE ALIGNMENT</span>
+          <span id="thresholdLabel">自动执行</span>
+        </div>
+        <div class="relation-heading">
+          <div>
+            <span>系统建议</span>
+            <strong id="relationValue">挂载</strong>
+          </div>
+          <div class="confidence-ring" id="confidenceRing">
+            <strong id="confidenceValue">87%</strong>
+            <span>置信度</span>
+          </div>
+        </div>
+        <p class="reason-copy" id="reasonCopy"></p>
+
+        <div class="candidate-block">
+          <div class="mini-heading">
+            <span>候选节点</span>
+            <small>点击即可改选</small>
+          </div>
+          <div id="candidateList" class="candidate-list"></div>
+        </div>
+
+        <form id="decisionForm" class="decision-form">
+          <div class="mini-heading"><span>你的决定</span><small>修正会写入修订表</small></div>
+          <div class="relation-picker" id="relationPicker">
+            <button type="button" data-relation="挂载">挂载</button>
+            <button type="button" data-relation="扩展">扩展</button>
+            <button type="button" data-relation="新建">新建</button>
+            <button type="button" data-relation="待定">待定</button>
+          </div>
+          <label class="field compact-field">
+            <span id="targetLabel">目标节点</span>
+            <select id="targetSelect"></select>
+          </label>
+          <label class="field compact-field" id="newTitleField" hidden>
+            <span>新知识点标题</span>
+            <input id="newNodeTitle" type="text" maxlength="80" placeholder="给这一支起个名字">
+          </label>
+          <button class="primary-button full" type="submit" id="confirmDecisionButton">确认这个位置</button>
+        </form>
+
+        <details class="trace-details">
+          <summary>这次判断留下了什么？</summary>
+          <pre id="traceOutput">{}</pre>
+        </details>
+      </section>
+
+      <section id="pendingPanel" class="pending-panel" hidden>
+        <span class="eyebrow">UNSORTED</span>
+        <h2>先不猜，也是一种答案。</h2>
+        <p>低置信内容停在未归类箱，等同类内容凑够后一次问完。</p>
+        <div id="pendingMiniList" class="pending-mini-list"></div>
+        <button class="secondary-button full" id="openPendingFromRail" type="button">打开未归类箱</button>
+      </section>
+    </aside>
+  </div>
+
+  <div id="pendingModal" class="modal-backdrop" hidden>
+    <section class="modal-card pending-modal" role="dialog" aria-modal="true" aria-labelledby="pendingModalTitle">
+      <button class="modal-close" id="closePendingModal" type="button" aria-label="关闭">×</button>
+      <span class="eyebrow">BATCH DECISION</span>
+      <h2 id="pendingModalTitle">攒够了，一次问完。</h2>
+      <p class="modal-intro">勾选 3–5 条同类内容，选择共同去处。每条都会分别留下修订记录。</p>
+      <div id="pendingModalList" class="pending-modal-list"></div>
+      <form id="batchForm" class="batch-form">
+        <label class="field">
+          <span>共同处理方式</span>
+          <select id="batchRelation">
+            <option value="新建">新建一个知识点</option>
+            <option value="挂载">挂到已有节点</option>
+            <option value="扩展">作为一个扩展节点</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>目标 / 上级节点</span>
+          <select id="batchTarget"></select>
+        </label>
+        <label class="field" id="batchTitleField">
+          <span>新节点标题</span>
+          <input id="batchNewTitle" type="text" maxlength="80" placeholder="例如：等价替换的补充结论">
+        </label>
+        <button class="primary-button full" type="submit">确认并更新知识树</button>
+      </form>
+    </section>
+  </div>
+
+  <div id="loadingOverlay" class="loading-overlay" hidden>
+    <div class="loom-loader"><span></span><span></span><span></span></div>
+    <strong id="loadingText">正在把这张板书接进知识网…</strong>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="/static/app.js"></script>
+</body>
+</html>
